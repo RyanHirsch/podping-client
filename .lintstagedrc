@@ -1,0 +1,8 @@
+{
+  "{src,test}/**/*.ts": [
+    "yarn prettier:write",
+    "eslint --ext .js,.ts",
+    "tsc",
+    "yarn test -- --bail --findRelatedTests"
+  ]
+}
