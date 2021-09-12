@@ -12,5 +12,7 @@
     "prettier",
     "plugin:prettier/recommended"
   ],
-  "rules": {}
+  "rules": {
+    "import/prefer-default-export": "off"
+  }
 }
