@@ -5,6 +5,7 @@
   "author": "Ryan Hirsch <ryan.hirsch@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@types/bytebuffer": "^5.0.42",
     "@types/jest": "^27.0.1",
     "@types/node": "^16.7.10",
     "@typescript-eslint/eslint-plugin": "^4.31.0",
