@@ -1,6 +1,6 @@
 # podping-client
 
-A client for reading from the Hive blockchain and pulling out [podping.cloud](https://podping.cloud/) transactions. This is designed to only work under node, but should be able to support the brower with changes if the need arises.
+A client for reading from the Hive blockchain and pulling out [podping.cloud](https://podping.cloud/) transactions. This is designed to only work under node, but should be able to support the browser with changes if the need arises.
 
 This client produces RxJS observables but that can be completely transparent to you as a consumer. You simply need to import/require the `*Stream$` function, call it with a duration (hours, minutes, seconds back to start checking the blockchain from), and call `.subscribe` to get events.
 
