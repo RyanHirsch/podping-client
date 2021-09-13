@@ -1,49 +1,29 @@
-import { Client, SignedBlock } from "@hiveio/dhive";
-import { differenceInSeconds, sub } from "date-fns";
-import { fromEvent, Observable } from "rxjs";
-import { mergeMap, tap } from "rxjs/operators";
-import type { Follower, OperationTuple, TODO } from "./types";
+import type { SignedBlock } from "@hiveio/dhive";
+import { fromEvent, Observable, from } from "rxjs";
+import { switchMap, mergeMap, tap, withLatestFrom } from "rxjs/operators";
 
-const client = new Client([
-  "https://api.hive.blog",
-  "https://api.hivekings.com",
-  "https://anyx.io",
-  "https://api.openhive.network",
-]);
+import { client, getEstimatedBlockNumber, getFollowing } from "./hive";
+import { logger } from "./logger";
+import type { OperationTuple, ProcessedBlock, TODO } from "./types";
 
-export async function getStream$(duration: Duration = { minutes: 15 }): Promise<Observable<TODO>> {
-  const [podping] = await client.database.getAccounts(["podping", "a", "blog", "100"]);
-  const followers: Follower[] = await client.call("condenser_api", "get_following", [podping.name]);
-
-  console.log(followers);
-
-  const [current, currentNumber] = await Promise.all([
-    client.blockchain.getCurrentBlock(),
-    client.blockchain.getCurrentBlockNum(),
-  ]);
-
-  const startBlockNumber = 10;
-  const earlier = await client.database.getBlock(startBlockNumber);
-
-  const currentBlockTime = new Date(current.timestamp);
-  const diff = differenceInSeconds(currentBlockTime, new Date(earlier.timestamp));
-  const estimatedSecondsBetweenBlocks = Math.floor(diff / (currentNumber - startBlockNumber));
-  const secondsBack = differenceInSeconds(currentBlockTime, sub(currentBlockTime, duration));
-
-  const estimatedBlockNumber =
-    currentNumber - Math.floor(secondsBack / estimatedSecondsBetweenBlocks);
-
-  console.log("Latest", current.timestamp);
-  console.log("Guess", (await client.database.getBlock(estimatedBlockNumber)).timestamp);
-
-  const stream = client.blockchain.getBlockStream({ from: estimatedBlockNumber });
-  return fromEvent(stream, "data").pipe(
+/**
+ * An RxJS observable that emits on matching matching operations. Each emission will contain information on the
+ * containing block, as well as a list of url with the reasoning
+ */
+export function getTransactionStream$(
+  duration: Duration = { minutes: 15 }
+): Observable<ProcessedBlock> {
+  return from(getEstimatedBlockNumber(duration)).pipe(
+    switchMap((estimatedBlockNumber) => {
+      return fromEvent(client.blockchain.getBlockStream({ from: estimatedBlockNumber }), "data");
+    }),
     tap((block) =>
-      console.log(
+      logger.debug(
         `Processing ${(block as SignedBlock).block_id} - ${(block as SignedBlock).timestamp}`
       )
     ),
-    mergeMap((block) => {
+    withLatestFrom(getFollowing()),
+    mergeMap(([block, followingList]) => {
       const b = block as SignedBlock;
       return b.transactions
         .flatMap((trans) => trans.operations as OperationTuple[])
@@ -52,7 +32,7 @@ export async function getStream$(duration: Duration = { minutes: 15 }): Promise<
             name === "custom_json" &&
             payload.id === "podping" &&
             Array.isArray(payload.required_posting_auths) &&
-            followers.some((f) => payload.required_posting_auths.includes(f.following))
+            followingList.some((f) => payload.required_posting_auths.includes(f.following))
         )
         .map(([, payload]) => ({
           blocktime: b.timestamp,
@@ -60,5 +40,20 @@ export async function getStream$(duration: Duration = { minutes: 15 }): Promise<
           ...JSON.parse(payload.json),
         }));
     })
+  );
+}
+
+/**
+ * An RxJS observable that emits on each url of a matching matching operations. Each emission will contain
+ * a single url as well as information on the containing block and reasoning
+ */
+export function getStream$(duration: Duration = { minutes: 15 }): TODO {
+  return getTransactionStream$(duration).pipe(
+    mergeMap(({ urls, ...rest }) =>
+      urls.map((url) => ({
+        url,
+        ...rest,
+      }))
+    )
   );
 }

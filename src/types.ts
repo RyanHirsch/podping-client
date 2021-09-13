@@ -3,7 +3,7 @@ import type { OperationName, VirtualOperationName } from "@hiveio/dhive";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TODO = any;
 
-export type Follower = {
+export type Follow = {
   follower: string;
   following: string;
   what: string[];
@@ -16,6 +16,15 @@ export type OpPayload = {
   required_posting_auths: TODO[];
   id: string;
   json: string;
+};
+
+export type ProcessedBlock = {
+  blocktime: string;
+  block_id: string;
+  version: string;
+  num_urls: number;
+  reason: string;
+  urls: string[];
 };
 
 /**

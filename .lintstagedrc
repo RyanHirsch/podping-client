@@ -2,7 +2,7 @@
   "{src,test}/**/*.ts": [
     "yarn prettier:write",
     "eslint --ext .js,.ts",
-    "tsc --noEmit",
+    "bash -c tsc --noEmit",
     "yarn test -- --bail --findRelatedTests"
   ]
 }

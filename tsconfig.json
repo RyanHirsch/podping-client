@@ -17,7 +17,6 @@
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": ".",
-    "noEmit": true
   },
   "exclude": [
     "node_modules"
