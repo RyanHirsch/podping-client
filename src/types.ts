@@ -18,13 +18,20 @@ export type OpPayload = {
   json: string;
 };
 
-export type ProcessedBlock = {
+type Processed = {
   blocktime: string;
   block_id: string;
   version: string;
   num_urls: number;
   reason: string;
+};
+
+export type ProcessedBlockTransaction = Processed & {
   urls: string[];
+};
+
+export type ProcessedStream = Processed & {
+  url: string;
 };
 
 /**
