@@ -14,9 +14,9 @@ export function getTransactionStream$(
   duration: Duration = { minutes: 15 }
 ): Observable<ProcessedBlockTransaction> {
   return from(getEstimatedBlockNumber(duration)).pipe(
-    switchMap((estimatedBlockNumber) => {
-      return fromEvent(client.blockchain.getBlockStream({ from: estimatedBlockNumber }), "data");
-    }),
+    switchMap((estimatedBlockNumber) =>
+      fromEvent(client.blockchain.getBlockStream({ from: estimatedBlockNumber }), "data")
+    ),
     tap((block) =>
       logger.debug(
         `Processing ${(block as SignedBlock).block_id} - ${(block as SignedBlock).timestamp}`
@@ -34,8 +34,8 @@ export function getTransactionStream$(
             Array.isArray(payload.required_posting_auths) &&
             followingList.some((f) => payload.required_posting_auths.includes(f.following))
         )
-        .map(([, payload]) => ({
-          blocktime: b.timestamp,
+        .map<ProcessedBlockTransaction>(([, payload]) => ({
+          blocktime: new Date(b.timestamp),
           block_id: b.block_id,
           ...JSON.parse(payload.json),
         }));

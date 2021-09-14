@@ -19,7 +19,7 @@ export type OpPayload = {
 };
 
 type Processed = {
-  blocktime: string;
+  blocktime: Date;
   block_id: string;
   version: string;
   num_urls: number;
