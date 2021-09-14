@@ -4,7 +4,7 @@ import { switchMap, mergeMap, tap, withLatestFrom } from "rxjs/operators";
 
 import { client, getEstimatedBlockNumber, getFollowing } from "./hive";
 import { logger } from "./logger";
-import type { OperationTuple, ProcessedBlock, TODO } from "./types";
+import type { OperationTuple, ProcessedBlockTransaction, ProcessedStream } from "./types";
 
 /**
  * An RxJS observable that emits on matching matching operations. Each emission will contain information on the
@@ -12,7 +12,7 @@ import type { OperationTuple, ProcessedBlock, TODO } from "./types";
  */
 export function getTransactionStream$(
   duration: Duration = { minutes: 15 }
-): Observable<ProcessedBlock> {
+): Observable<ProcessedBlockTransaction> {
   return from(getEstimatedBlockNumber(duration)).pipe(
     switchMap((estimatedBlockNumber) => {
       return fromEvent(client.blockchain.getBlockStream({ from: estimatedBlockNumber }), "data");
@@ -47,7 +47,7 @@ export function getTransactionStream$(
  * An RxJS observable that emits on each url of a matching matching operations. Each emission will contain
  * a single url as well as information on the containing block and reasoning
  */
-export function getStream$(duration: Duration = { minutes: 15 }): TODO {
+export function getStream$(duration: Duration = { minutes: 15 }): Observable<ProcessedStream> {
   return getTransactionStream$(duration).pipe(
     mergeMap(({ urls, ...rest }) =>
       urls.map((url) => ({
