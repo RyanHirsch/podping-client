@@ -1,6 +1,6 @@
 {
   "name": "podping-client",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "dist/index.js",
   "author": "Ryan Hirsch <ryan.hirsch@gmail.com>",
   "license": "MIT",
@@ -33,6 +33,7 @@
     "prettier:check": "npm run prettier:base -- --list-different \"src/**/*.{ts,tsx}\"",
     "prettier:write": "npm run prettier:base -- --write \"src/**/*.{ts,tsx}\"",
     "start": "node dist/index.js",
+    "prepublishOnly": "yarn lint && yarn test && yarn build",
     "prebuild": "rimraf dist",
     "build": "npm-run-all -p build:*",
     "build:src": "esbuild src/index.ts  --bundle --platform=node --target=node14 --outfile=dist/index.js",
