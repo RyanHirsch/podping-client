@@ -3,12 +3,30 @@ import { differenceInSeconds, sub } from "date-fns";
 import { logger } from "./logger";
 import type { Follow } from "./types";
 
-export const client = new Client([
+function shuffleArray<T>(array: T[]): void {
+  // eslint-disable-next-line no-plusplus
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    // eslint-disable-next-line no-param-reassign
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+const addressList = [
+  "https://api.openhive.network",
   "https://api.hive.blog",
+  "https://hive.roelandp.nl",
+  "https://techcoderx.com",
   "https://api.hivekings.com",
   "https://anyx.io",
-  "https://api.openhive.network",
-]);
+  "https://api.deathwing.me",
+  "https://hive-api.arcange.eu",
+  "https://rpc.ecency.com",
+  "https://hived.privex.io",
+];
+shuffleArray(addressList);
+
+export const client = new Client(addressList);
 
 export async function getFollowing(accountName = "podping"): Promise<Follow[]> {
   const [podping] = await client.database.getAccounts([accountName, "a", "blog", "100"]);

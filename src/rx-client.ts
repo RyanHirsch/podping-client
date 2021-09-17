@@ -27,7 +27,9 @@ export function getTransactionStream$(
       const b = block as SignedBlock;
       const followingNames = followingList.map((f) => f.following);
       return b.transactions
-        .flatMap((trans) => trans.operations as OperationTuple[])
+        .flatMap((trans) => {
+          return trans.operations as OperationTuple[];
+        })
         .filter(
           ([name, payload]) =>
             name === "custom_json" &&
@@ -36,7 +38,7 @@ export function getTransactionStream$(
             followingNames.some((f) => payload.required_posting_auths.includes(f))
         )
         .map<ProcessedBlockTransaction>(([, payload]) => ({
-          blocktime: new Date(b.timestamp),
+          blocktime: new Date(`${b.timestamp}Z`),
           block_id: b.block_id,
           payload_id: payload.id,
           posting_auth: payload.required_posting_auths.find((auth) =>

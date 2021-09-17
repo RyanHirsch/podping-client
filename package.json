@@ -42,7 +42,7 @@
     "lint": "tsc --noEmit && eslint --ext .js,.ts src/",
     "test:watch": "jest --watch",
     "dev": "esr src/index.ts",
-    "dev:watch": "ts-node-dev --respawn --no-notify src/index.ts"
+    "dev:ex": "npm run build:src && node test.js"
   },
   "dependencies": {
     "@hiveio/dhive": "^1.0.1",
