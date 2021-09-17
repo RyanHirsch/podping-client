@@ -21,6 +21,7 @@ export type OpPayload = {
 type Processed = {
   blocktime: Date;
   block_id: string;
+  block_num: number;
   version: string;
   num_urls: number;
   reason: string;

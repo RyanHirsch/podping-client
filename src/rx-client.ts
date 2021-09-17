@@ -13,10 +13,12 @@ import type { OperationTuple, ProcessedBlockTransaction, ProcessedStream } from 
 export function getTransactionStream$(
   duration: Duration = { minutes: 15 }
 ): Observable<ProcessedBlockTransaction> {
+  let blockNumber = 0;
   return from(getEstimatedBlockNumber(duration)).pipe(
-    switchMap((estimatedBlockNumber) =>
-      fromEvent(client.blockchain.getBlockStream({ from: estimatedBlockNumber }), "data")
-    ),
+    switchMap((estimatedBlockNumber) => {
+      blockNumber = estimatedBlockNumber;
+      return fromEvent(client.blockchain.getBlockStream({ from: estimatedBlockNumber }), "data");
+    }),
     tap((block) =>
       logger.debug(
         `Processing ${(block as SignedBlock).block_id} - ${(block as SignedBlock).timestamp}`
@@ -25,6 +27,8 @@ export function getTransactionStream$(
     withLatestFrom(getFollowing()),
     mergeMap(([block, followingList]) => {
       const b = block as SignedBlock;
+      const thisBlock = blockNumber;
+      blockNumber += 1;
       const followingNames = followingList.map((f) => f.following);
       return b.transactions
         .flatMap((trans) => {
@@ -40,6 +44,7 @@ export function getTransactionStream$(
         .map<ProcessedBlockTransaction>(([, payload]) => ({
           blocktime: new Date(`${b.timestamp}Z`),
           block_id: b.block_id,
+          block_num: thisBlock,
           payload_id: payload.id,
           posting_auth: payload.required_posting_auths.find((auth) =>
             followingNames.includes(auth)
