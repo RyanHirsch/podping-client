@@ -1,1 +1,1 @@
-export { getTransactionStream$ as getBlockStream$, getStream$ } from "./rx-client";
+export { getTransactionStream$, getStream$ } from "./rx-client";

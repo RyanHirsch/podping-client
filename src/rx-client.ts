@@ -25,6 +25,7 @@ export function getTransactionStream$(
     withLatestFrom(getFollowing()),
     mergeMap(([block, followingList]) => {
       const b = block as SignedBlock;
+      const followingNames = followingList.map((f) => f.following);
       return b.transactions
         .flatMap((trans) => trans.operations as OperationTuple[])
         .filter(
@@ -32,11 +33,15 @@ export function getTransactionStream$(
             name === "custom_json" &&
             payload.id === "podping" &&
             Array.isArray(payload.required_posting_auths) &&
-            followingList.some((f) => payload.required_posting_auths.includes(f.following))
+            followingNames.some((f) => payload.required_posting_auths.includes(f))
         )
         .map<ProcessedBlockTransaction>(([, payload]) => ({
           blocktime: new Date(b.timestamp),
           block_id: b.block_id,
+          payload_id: payload.id,
+          posting_auth: payload.required_posting_auths.find((auth) =>
+            followingNames.includes(auth)
+          ),
           ...JSON.parse(payload.json),
         }));
     })

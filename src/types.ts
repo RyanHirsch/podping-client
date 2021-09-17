@@ -24,6 +24,8 @@ type Processed = {
   version: string;
   num_urls: number;
   reason: string;
+  payload_id: string;
+  posting_auth: string;
 };
 
 export type ProcessedBlockTransaction = Processed & {
