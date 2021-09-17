@@ -15,18 +15,21 @@ function shuffleArray<T>(array: T[]): void {
 const addressList = [
   "https://api.openhive.network",
   "https://api.hive.blog",
-  "https://hive.roelandp.nl",
-  "https://techcoderx.com",
+  // "https://hive.roelandp.nl", // times out
+  // "https://techcoderx.com",
   "https://api.hivekings.com",
   "https://anyx.io",
-  "https://api.deathwing.me",
-  "https://hive-api.arcange.eu",
-  "https://rpc.ecency.com",
-  "https://hived.privex.io",
+  // "https://api.deathwing.me", // RPC Error sometimes
+  // "https://hive-api.arcange.eu",
+  // "https://rpc.ecency.com",
+  // "https://hived.privex.io",
 ];
 shuffleArray(addressList);
 
-export const client = new Client(addressList);
+export const client = new Client(addressList, {
+  timeout: 2000,
+  failoverThreshold: 2,
+});
 
 export async function getFollowing(accountName = "podping"): Promise<Follow[]> {
   const [podping] = await client.database.getAccounts([accountName, "a", "blog", "100"]);
