@@ -4,6 +4,9 @@
   "main": "dist/index.js",
   "author": "Ryan Hirsch <ryan.hirsch@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "url": "https://github.com/RyanHirsch/podping-client"
+  },
   "devDependencies": {
     "@types/bytebuffer": "^5.0.42",
     "@types/jest": "^27.0.1",

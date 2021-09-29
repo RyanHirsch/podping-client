@@ -24,18 +24,20 @@ const { getTransactionStream$ } = require("podping-client");
 getTransactionStream$({ minutes: 5 }).subscribe((block) => {
   console.log(block);
   // {
-  //   blocktime: '2021-09-13T15:04:54',
-  //   block_id: '036bb5f43b77f874a0cd216d4192a127752ab778',
+  //   blocktime: 2021-09-29T14:03:24.000Z,
+  //   block_id: '0372b4b6a33995e35427d4a4dec9ae4132981550',
+  //   block_num: 57849014,
+  //   payload_id: 'podping',
+  //   posting_auth: 'podping.aaa',
   //   version: '0.3',
-  //   num_urls: 6,
+  //   num_urls: 5,
   //   reason: 'feed_update',
   //   urls: [
-  //     'https://feeds.buzzsprout.com/1363222.rss',
-  //     'https://feeds.buzzsprout.com/4442.rss',
-  //     'https://feeds.buzzsprout.com/1724216.rss',
-  //     'https://feeds.buzzsprout.com/1826031.rss',
-  //     'https://feeds.buzzsprout.com/1823965.rss',
-  //     'https://feeds.buzzsprout.com/1848745.rss'
+  //     'https://feeds.buzzsprout.com/1842728.rss',
+  //     'https://feeds.buzzsprout.com/1588819.rss',
+  //     'https://feeds.buzzsprout.com/265419.rss',
+  //     'https://feeds.buzzsprout.com/1710223.rss',
+  //     'https://feeds.buzzsprout.com/1776249.rss'
   //   ]
   // }
 });
@@ -49,11 +51,48 @@ const { getStream$ } = require("podping-client");
 getStream$().subscribe((block) => {
   console.log(block);
   // {
-  //   blocktime: '2021-09-13T15:04:54',
-  //   block_id: '036bb5f43b77f874a0cd216d4192a127752ab778',
+  //   url: 'https://media.rss.com/painintopurpose/feed.xml',
+  //   blocktime: 2021-09-29T14:04:30.000Z,
+  //   block_id: '0372b4ccc636fd90229fc88212ea29bf4d30f482',
+  //   block_num: 57849036,
+  //   payload_id: 'podping',
+  //   posting_auth: 'podping.aaa',
   //   version: '0.3',
-  //   reason: 'feed_update',
-  //   url: 'https://feeds.buzzsprout.com/1363222.rss'
+  //   num_urls: 4,
+  //   reason: 'feed_update'
+  // }
+  // {
+  //   url: 'https://feeds.buzzsprout.com/1117766.rss',
+  //   blocktime: 2021-09-29T14:04:30.000Z,
+  //   block_id: '0372b4ccc636fd90229fc88212ea29bf4d30f482',
+  //   block_num: 57849036,
+  //   payload_id: 'podping',
+  //   posting_auth: 'podping.aaa',
+  //   version: '0.3',
+  //   num_urls: 4,
+  //   reason: 'feed_update'
+  // }
+  // {
+  //   url: 'https://feeds.buzzsprout.com/1830336.rss',
+  //   blocktime: 2021-09-29T14:04:30.000Z,
+  //   block_id: '0372b4ccc636fd90229fc88212ea29bf4d30f482',
+  //   block_num: 57849036,
+  //   payload_id: 'podping',
+  //   posting_auth: 'podping.aaa',
+  //   version: '0.3',
+  //   num_urls: 4,
+  //   reason: 'feed_update'
+  // }
+  // {
+  //   url: 'https://media.rss.com/tes6071/feed.xml',
+  //   blocktime: 2021-09-29T14:04:30.000Z,
+  //   block_id: '0372b4ccc636fd90229fc88212ea29bf4d30f482',
+  //   block_num: 57849036,
+  //   payload_id: 'podping',
+  //   posting_auth: 'podping.aaa',
+  //   version: '0.3',
+  //   num_urls: 4,
+  //   reason: 'feed_update'
   // }
 });
 ```

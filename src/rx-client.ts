@@ -73,8 +73,10 @@ export function getTransactionStream$(
  * An RxJS observable that emits on each url of a matching matching operations. Each emission will contain
  * a single url as well as information on the containing block and reasoning
  */
-export function getStream$(duration: Duration = { minutes: 15 }): Observable<ProcessedStream> {
-  return getTransactionStream$(duration).pipe(
+export function getStream$(
+  durationOrBlocknum: Duration | { blocknum: number } = { minutes: 15 }
+): Observable<ProcessedStream> {
+  return getTransactionStream$(durationOrBlocknum).pipe(
     mergeMap(({ urls, ...rest }) =>
       urls.map((url) => ({
         url,

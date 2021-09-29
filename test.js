@@ -1,4 +1,4 @@
-const { getTransactionStream$ } = require("./dist/index");
+const { getTransactionStream$, getStream$ } = require("./dist/index");
 const { interval, from, concat } = require("rxjs");
 const { take, mergeMap } = require("rxjs/operators");
 
@@ -13,7 +13,7 @@ const { take, mergeMap } = require("rxjs/operators");
 // concat(from(getFoo()), interval(1000).pipe(mergeMap(() => getFoo())))
 //   .pipe(take(10))
 
-getTransactionStream$().subscribe({
+getStream$().subscribe({
   next(t) {
     console.log(t);
   },
