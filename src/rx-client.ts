@@ -1,34 +1,48 @@
-import type { SignedBlock } from "@hiveio/dhive";
-import { fromEvent, Observable, from } from "rxjs";
-import { switchMap, mergeMap, tap, withLatestFrom } from "rxjs/operators";
+import { fromEvent, Observable, from, concat, interval } from "rxjs";
+import { switchMap, mergeMap, tap, withLatestFrom, takeUntil } from "rxjs/operators";
 
-import { client, getEstimatedBlockNumber, getFollowing } from "./hive";
+import { getBlockStream, getEstimatedBlockNumber, getFollowing } from "./hive";
 import { logger } from "./logger";
-import type { OperationTuple, ProcessedBlockTransaction, ProcessedStream } from "./types";
+import type {
+  HiveBlock,
+  OperationTuple,
+  ProcessedBlockTransaction,
+  ProcessedStream,
+} from "./types";
+
+type Blocknum = { blocknum: number };
+
+function isBlocknum(val: unknown): val is Blocknum {
+  return Object.prototype.hasOwnProperty.call(val, "blocknum");
+}
 
 /**
  * An RxJS observable that emits on matching matching operations. Each emission will contain information on the
  * containing block, as well as a list of url with the reasoning
  */
 export function getTransactionStream$(
-  duration: Duration = { minutes: 15 }
+  durationOrBlocknum: Duration | { blocknum: number } = { minutes: 15 }
 ): Observable<ProcessedBlockTransaction> {
-  let blockNumber = 0;
-  return from(getEstimatedBlockNumber(duration)).pipe(
+  return from(
+    isBlocknum(durationOrBlocknum)
+      ? Promise.resolve(durationOrBlocknum.blocknum)
+      : getEstimatedBlockNumber(durationOrBlocknum)
+  ).pipe(
     switchMap((estimatedBlockNumber) => {
-      blockNumber = estimatedBlockNumber;
-      return fromEvent(client.blockchain.getBlockStream({ from: estimatedBlockNumber }), "data");
+      const blockStream = getBlockStream({
+        from: estimatedBlockNumber,
+        ignoreEnd: process.env.NODE_ENV === "production" || Boolean(process.env.IGNORE_END),
+      });
+      const data$ = fromEvent<HiveBlock>(blockStream, "data");
+      const end$ = fromEvent(blockStream, "end");
+      return data$.pipe(takeUntil(end$));
     }),
-    tap((block) =>
-      logger.debug(
-        `Processing ${(block as SignedBlock).block_id} - ${(block as SignedBlock).timestamp}`
-      )
+    tap((block) => logger.debug(`Processing ${block.block_num} - ${block.timestamp}`)),
+    withLatestFrom(
+      concat(from(getFollowing()), interval(120_000).pipe(mergeMap(() => getFollowing())))
     ),
-    withLatestFrom(getFollowing()),
     mergeMap(([block, followingList]) => {
-      const b = block as SignedBlock;
-      const thisBlock = blockNumber;
-      blockNumber += 1;
+      const b = block as HiveBlock;
       const followingNames = followingList.map((f) => f.following);
       return b.transactions
         .flatMap((trans) => {
@@ -44,7 +58,7 @@ export function getTransactionStream$(
         .map<ProcessedBlockTransaction>(([, payload]) => ({
           blocktime: new Date(`${b.timestamp}Z`),
           block_id: b.block_id,
-          block_num: thisBlock,
+          block_num: b.block_num,
           payload_id: payload.id,
           posting_auth: payload.required_posting_auths.find((auth) =>
             followingNames.includes(auth)

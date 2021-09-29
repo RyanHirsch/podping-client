@@ -1,14 +1,23 @@
 const { getTransactionStream$ } = require("./dist/index");
-const { take } = require("rxjs/operators");
+const { interval, from, concat } = require("rxjs");
+const { take, mergeMap } = require("rxjs/operators");
 
-getTransactionStream$()
-  .pipe(take(1))
-  .subscribe({
-    next(t) {
-      console.log(t.blocktime.toString());
-      console.log(t);
-    },
-    complete() {
-      process.exit();
-    },
-  });
+// getTransactionStream$({ blocknum: 57821679 })
+
+// function getFoo() {
+//   console.log("getting a foo!!");
+//   return Promise.resolve("foo");
+// }
+
+// console.log("Started!");
+// concat(from(getFoo()), interval(1000).pipe(mergeMap(() => getFoo())))
+//   .pipe(take(10))
+
+getTransactionStream$().subscribe({
+  next(t) {
+    console.log(t);
+  },
+  complete() {
+    process.exit();
+  },
+});

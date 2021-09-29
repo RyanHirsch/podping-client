@@ -1,35 +1,117 @@
-import { Client, SignedBlock } from "@hiveio/dhive";
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import { BlockchainStreamOptions, Client, SignedBlock } from "@hiveio/dhive";
 import { differenceInSeconds, sub } from "date-fns";
+import EventEmitter from "events";
+
 import { logger } from "./logger";
 import type { Follow } from "./types";
 
-function shuffleArray<T>(array: T[]): void {
+function shuffleArray<T>(array: T[]): T[] {
+  const copy = [...array];
   // eslint-disable-next-line no-plusplus
-  for (let i = array.length - 1; i > 0; i--) {
+  for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     // eslint-disable-next-line no-param-reassign
-    [array[i], array[j]] = [array[j], array[i]];
+    [copy[i], copy[j]] = [copy[j], copy[i]];
   }
+  return copy;
 }
 
 const addressList = [
   "https://api.openhive.network",
   "https://api.hive.blog",
-  // "https://hive.roelandp.nl", // times out
-  // "https://techcoderx.com",
-  "https://api.hivekings.com",
+  "https://techcoderx.com",
   "https://anyx.io",
-  // "https://api.deathwing.me", // RPC Error sometimes
-  // "https://hive-api.arcange.eu",
-  // "https://rpc.ecency.com",
-  // "https://hived.privex.io",
+  "https://api.deathwing.me",
+  "https://hive-api.arcange.eu",
+  "https://rpc.ecency.com",
+  "https://hived.privex.io",
 ];
-shuffleArray(addressList);
 
-export const client = new Client(addressList, {
-  timeout: 2000,
-  failoverThreshold: 2,
-});
+export function newClient(): Client {
+  return new Client(shuffleArray(addressList), {
+    timeout: 2000,
+    failoverThreshold: 0,
+  });
+}
+
+let client = newClient();
+
+export function getClient(): Client {
+  return client;
+}
+
+export function getNewClient(): Client {
+  client = newClient();
+  return getClient();
+}
+
+export function getBlockStream(
+  opts: BlockchainStreamOptions & { ignoreEnd: boolean }
+): EventEmitter {
+  class MyEmitter extends EventEmitter {}
+  const myEmitter = new MyEmitter();
+
+  let currentBlockNumber = opts.from;
+
+  let stream: NodeJS.ReadableStream | null = null; // = getClient().blockchain.getBlockStream(opts);
+
+  const cleanUp = () => {
+    if (stream) {
+      stream.removeListener("error", errorHandler);
+      stream.removeListener("data", dataHandler);
+      stream.removeListener("end", endHandler);
+    }
+  };
+
+  const listen = () => {
+    if (!stream) {
+      stream = getClient().blockchain.getBlockStream({ ...opts, from: currentBlockNumber });
+    } else {
+      cleanUp();
+      stream = getNewClient().blockchain.getBlockStream({ ...opts, from: currentBlockNumber });
+    }
+
+    stream.addListener("data", dataHandler);
+    stream.addListener("error", errorHandler);
+    if (!opts.ignoreEnd) {
+      stream.addListener("end", endHandler);
+    }
+  };
+
+  const errorHandler = (err: Error) => {
+    logger.error(err, "Recreating the stream");
+    listen();
+  };
+
+  const dataHandler = (block: SignedBlock) => {
+    if (currentBlockNumber) {
+      myEmitter.emit("data", { ...block, block_num: currentBlockNumber });
+      currentBlockNumber++;
+    } else {
+      logger.warn(`Current block number has an unexpected value ${currentBlockNumber}`);
+      myEmitter.emit("data", block);
+    }
+  };
+
+  const endHandler = () => {
+    cleanUp();
+    myEmitter.emit("end");
+  };
+
+  if (!currentBlockNumber) {
+    getClient()
+      .blockchain.getCurrentBlockNum()
+      .then((num) => {
+        currentBlockNumber = num;
+        listen();
+      });
+  } else {
+    listen();
+  }
+
+  return myEmitter;
+}
 
 export async function getFollowing(accountName = "podping"): Promise<Follow[]> {
   const [podping] = await client.database.getAccounts([accountName, "a", "blog", "100"]);

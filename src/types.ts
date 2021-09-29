@@ -1,4 +1,4 @@
-import type { OperationName, VirtualOperationName } from "@hiveio/dhive";
+import type { OperationName, SignedBlock, VirtualOperationName } from "@hiveio/dhive";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TODO = any;
@@ -9,6 +9,7 @@ export type Follow = {
   what: string[];
 };
 
+export type HiveBlock = { block_num: number } & SignedBlock;
 export type OperationTuple = [OpName, OpPayload];
 export type OpName = OperationName | VirtualOperationName;
 export type OpPayload = {
@@ -36,6 +37,54 @@ export type ProcessedBlockTransaction = Processed & {
 export type ProcessedStream = Processed & {
   url: string;
 };
+
+export function mockBlock() {
+  return {
+    previous: "036a637261d4d706cc7c00f20c05162d2bb94190",
+    timestamp: "2021-09-10T14:38:15",
+    witness: "timcliff",
+    transaction_merkle_root: "e63d859770f03601c75e5c3c1b576d6ced98f45c",
+    extensions: [],
+    witness_signature:
+      "20dbd69ca762a8a0698b7adb705145759948132b6058cc9cd152f173778a35ef0f7f233a956da03ec81b1e45479c53f7e8ef905a241e170fb3ac68cee83c63a20e",
+    transactions: [
+      {
+        ref_block_num: 25439,
+        ref_block_prefix: 1765843964,
+        expiration: "2021-09-10T14:48:09",
+        operations: [
+          [
+            "custom_json",
+            {
+              required_auths: [],
+              required_posting_auths: ["podping.bbb"],
+              id: "podping",
+              json: '{"version":"0.3","num_urls":7,"reason":"feed_update","urls":["https://feeds.transistor.fm/into-the-bytecode","https://feeds.buzzsprout.com/1850299.rss","https://feeds.buzzsprout.com/273509.rss","https://feeds.buzzsprout.com/1662799.rss","https://feeds.buzzsprout.com/1610350.rss","https://media.rss.com/bass/feed.xml","https://media.rss.com/bass/feed.xml"]}',
+            },
+          ],
+
+          [
+            "custom_json",
+            {
+              required_auths: [],
+              required_posting_auths: ["podping.aaa"],
+              id: "podping",
+              json: '{"version": "0.3", "num_urls": 4, "reason": "feed_update", "urls": [ "https://feeds.buzzsprout.com/1799363.rss", "https://feeds.buzzsprout.com/833536.rss", "https://feeds.buzzsprout.com/1729912.rss", "https://feeds.buzzsprout.com/733916.rss"] }',
+            },
+          ],
+        ],
+        extensions: [],
+        signatures: [],
+        transaction_id: "d38135540ba6d160c45e57975b17e2ff8f0e7bf1",
+        block_num: 57303923,
+        transaction_num: 0,
+      },
+    ],
+    block_id: "036a63739f9055ba273556552605b47fa67baf1c",
+    signing_key: "STM7ZgH3RUvjF2ZNJt7ozZNhpJBkUVDSc4MpCpbzwtLydGjS3zEX7",
+    transaction_ids: ["d38135540ba6d160c45e57975b17e2ff8f0e7bf1"],
+  };
+}
 
 /**
  * Block
@@ -108,7 +157,7 @@ Single Operation for Podping
     'custom_json',
     {
       required_auths: [],
-      required_posting_auths: [Array],
+      required_posting_auths: ["podping.aaa"],
       id: 'podping',
       json: '{"version":"0.3","num_urls":7,"reason":"feed_update","urls":["https://feeds.transistor.fm/into-the-bytecode","https://feeds.buzzsprout.com/1850299.rss","https://feeds.buzzsprout.com/273509.rss","https://feeds.buzzsprout.com/1662799.rss","https://feeds.buzzsprout.com/1610350.rss","https://media.rss.com/bass/feed.xml","https://media.rss.com/bass/feed.xml"]}'
     }
