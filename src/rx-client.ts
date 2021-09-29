@@ -31,7 +31,9 @@ export function getTransactionStream$(
     switchMap((estimatedBlockNumber) => {
       const blockStream = getBlockStream({
         from: estimatedBlockNumber,
-        ignoreEnd: process.env.NODE_ENV === "production" || Boolean(process.env.IGNORE_END),
+        ignoreEnd:
+          (process.env.NODE_ENV === "production" || Boolean(process.env.IGNORE_END)) &&
+          !process.env.ALLOW_END,
       });
       const data$ = fromEvent<HiveBlock>(blockStream, "data");
       const end$ = fromEvent(blockStream, "end");

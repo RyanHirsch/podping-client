@@ -2,7 +2,9 @@
 
 A client for reading from the Hive blockchain and pulling out [podping.cloud](https://podping.cloud/) transactions. This is designed to only work under node, but should be able to support the browser with changes if the need arises.
 
-This client produces RxJS observables but that can be completely transparent to you as a consumer. You simply need to import/require the `*Stream$` function, call it with a duration (hours, minutes, seconds back to start checking the blockchain from), and call `.subscribe` to get events.
+This client produces RxJS observables but that can be completely transparent to you as a consumer. You simply need to import/require the `*Stream$` function, call it with a duration (hours, minutes, seconds back to start checking the blockchain from) or starting block number, and call `.subscribe` to get events.
+
+This package is also using `pino` for logging and the log level can be configured via `process.env.LOG`, by default `warn` level logging will be produced for `NODE_ENV=production` and `info` for all other environments.
 
 ## Install
 
@@ -15,6 +17,12 @@ npm install podping-client
 ```
 
 ## Usage
+
+When an error or end event occurs with the blockchain stream, it will attempt to recreate the stream transparently for the consumer if the following evaluates to `true`
+
+```js
+process.env.NODE_ENV === "production" || Boolean(process.env.IGNORE_END),
+```
 
 ```js
 const { getTransactionStream$ } = require("podping-client");

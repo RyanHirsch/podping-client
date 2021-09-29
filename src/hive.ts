@@ -54,7 +54,11 @@ export function getBlockStream(
 
   let currentBlockNumber = opts.from;
 
-  let stream: NodeJS.ReadableStream | null = null; // = getClient().blockchain.getBlockStream(opts);
+  let stream: NodeJS.ReadableStream | null = null;
+
+  if (opts.ignoreEnd) {
+    logger.info("END events will be ignored due to configuration");
+  }
 
   const cleanUp = () => {
     if (stream) {
@@ -66,22 +70,21 @@ export function getBlockStream(
 
   const listen = () => {
     if (!stream) {
+      logger.info("Creating blockchain stream");
       stream = getClient().blockchain.getBlockStream({ ...opts, from: currentBlockNumber });
     } else {
+      logger.info("Recreating blockchain stream");
       cleanUp();
       stream = getNewClient().blockchain.getBlockStream({ ...opts, from: currentBlockNumber });
     }
 
     stream.addListener("data", dataHandler);
     stream.addListener("error", errorHandler);
-    if (!opts.ignoreEnd) {
-      stream.addListener("end", endHandler);
-    }
+    stream.addListener("end", endHandler);
   };
 
   const errorHandler = (err: Error) => {
-    logger.error(err, "Recreating the stream");
-    listen();
+    logger.error(err);
   };
 
   const dataHandler = (block: SignedBlock) => {
@@ -95,8 +98,12 @@ export function getBlockStream(
   };
 
   const endHandler = () => {
-    cleanUp();
-    myEmitter.emit("end");
+    if (opts.ignoreEnd) {
+      listen();
+    } else {
+      cleanUp();
+      myEmitter.emit("end");
+    }
   };
 
   if (!currentBlockNumber) {
