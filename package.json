@@ -7,6 +7,12 @@
   "repository": {
     "url": "https://github.com/RyanHirsch/podping-client"
   },
+  "keywords": [
+    "podcasting20",
+    "podping",
+    "hive",
+    "blockchain"
+  ],
   "devDependencies": {
     "@types/bytebuffer": "^5.0.42",
     "@types/jest": "^27.0.1",
@@ -37,6 +43,7 @@
     "prettier:write": "npm run prettier:base -- --write \"src/**/*.{ts,tsx}\"",
     "start": "node dist/index.js",
     "prepublishOnly": "yarn lint && yarn test && yarn build",
+    "postpublish": "git push && git push --tags",
     "prebuild": "rimraf dist",
     "build": "npm-run-all -p build:*",
     "build:src": "esbuild src/index.ts  --bundle --platform=node --target=node14 --outfile=dist/index.js",
