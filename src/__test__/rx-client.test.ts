@@ -2,7 +2,12 @@ import { take } from "rxjs/operators";
 // import type { SignedBlock } from "@hiveio/dhive";
 
 import * as rxClient from "../rx-client";
-import { getEstimatedBlockNumber, getCurrentBlock, getFollowing, getBlockStream } from "../hive";
+import {
+  getCurrentBlock,
+  getBlockStream,
+  getEstimatedBlockNumberWithRetry,
+  getFollowingWithRetry,
+} from "../hive";
 // import type { TODO } from "../types";
 import { mockBlock } from "../types";
 
@@ -51,9 +56,9 @@ describe("rx-client", () => {
 
       let count = 0;
 
-      (getEstimatedBlockNumber as jest.Mock).mockResolvedValue(1);
+      (getEstimatedBlockNumberWithRetry as jest.Mock).mockResolvedValue(1);
       (getCurrentBlock as jest.Mock).mockResolvedValue([{ block_id: "12" }, 1]);
-      (getFollowing as jest.Mock).mockResolvedValue([
+      (getFollowingWithRetry as jest.Mock).mockResolvedValue([
         { follower: "a", following: "podping.aaa", what: "blog" },
         { follower: "b", following: "podping.bbb", what: "blog" },
       ]);
@@ -85,9 +90,9 @@ describe("rx-client", () => {
 
       let count = 0;
 
-      (getEstimatedBlockNumber as jest.Mock).mockResolvedValue(1);
+      (getEstimatedBlockNumberWithRetry as jest.Mock).mockResolvedValue(1);
       (getCurrentBlock as jest.Mock).mockResolvedValue([{ block_id: "12" }, 1]);
-      (getFollowing as jest.Mock).mockResolvedValue([
+      (getFollowingWithRetry as jest.Mock).mockResolvedValue([
         { follower: "a", following: "podping.aaa", what: "blog" },
       ]);
       (getBlockStream as jest.Mock).mockReturnValue(obj);
@@ -121,9 +126,9 @@ describe("rx-client", () => {
 
       let count = 0;
 
-      (getEstimatedBlockNumber as jest.Mock).mockResolvedValue(1);
+      (getEstimatedBlockNumberWithRetry as jest.Mock).mockResolvedValue(1);
       (getCurrentBlock as jest.Mock).mockResolvedValue([{ block_id: "12" }, 1]);
-      (getFollowing as jest.Mock).mockResolvedValue([
+      (getFollowingWithRetry as jest.Mock).mockResolvedValue([
         { follower: "a", following: "podping.aaa", what: "blog" },
         { follower: "b", following: "podping.bbb", what: "blog" },
       ]);

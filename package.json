@@ -48,7 +48,7 @@
     "build": "npm-run-all -p build:*",
     "build:src": "esbuild src/index.ts  --bundle --platform=node --target=node14 --outfile=dist/index.js",
     "build:types": "tsc --project tsconfig.types.json",
-    "test": "jest",
+    "test": "LOG=silent jest",
     "lint": "tsc --noEmit && eslint --ext .js,.ts src/",
     "test:watch": "jest --watch",
     "dev": "esr src/index.ts",
