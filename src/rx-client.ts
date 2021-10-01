@@ -1,8 +1,9 @@
 import { fromEvent, Observable, from, concat, interval } from "rxjs";
 import { switchMap, mergeMap, tap, withLatestFrom, takeUntil } from "rxjs/operators";
 
-import { getBlockStream, getEstimatedBlockNumber, getFollowing } from "./hive";
+import { getBlockStream, getEstimatedBlockNumberWithRetry, getFollowingWithRetry } from "./hive";
 import { logger } from "./logger";
+import config from "./config";
 import type {
   HiveBlock,
   OperationTuple,
@@ -26,14 +27,12 @@ export function getTransactionStream$(
   return from(
     isBlocknum(durationOrBlocknum)
       ? Promise.resolve(durationOrBlocknum.blocknum)
-      : getEstimatedBlockNumber(durationOrBlocknum)
+      : getEstimatedBlockNumberWithRetry(durationOrBlocknum)
   ).pipe(
     switchMap((estimatedBlockNumber) => {
       const blockStream = getBlockStream({
         from: estimatedBlockNumber,
-        ignoreEnd:
-          (process.env.NODE_ENV === "production" || Boolean(process.env.IGNORE_END)) &&
-          !process.env.ALLOW_END,
+        ignoreEnd: config.ignoreEnd,
       });
       const data$ = fromEvent<HiveBlock>(blockStream, "data");
       const end$ = fromEvent(blockStream, "end");
@@ -41,7 +40,10 @@ export function getTransactionStream$(
     }),
     tap((block) => logger.debug(`Processing ${block.block_num} - ${block.timestamp}`)),
     withLatestFrom(
-      concat(from(getFollowing()), interval(120_000).pipe(mergeMap(() => getFollowing())))
+      concat(
+        from(getFollowingWithRetry()),
+        interval(120_000).pipe(mergeMap(() => getFollowingWithRetry()))
+      )
     ),
     mergeMap(([block, followingList]) => {
       const b = block as HiveBlock;
